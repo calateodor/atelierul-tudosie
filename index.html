@@ -468,31 +468,47 @@ footer{background:var(--panel);padding:clamp(56px,6vw,92px) var(--gut) 34px;bord
   font-size:10.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft)
 }
 
-/* ---------- the five static-hero gates ---------- */
-@media (max-width:720px),
-       (orientation:portrait) and (max-width:1024px),
-       (orientation:portrait) and (pointer:coarse),
-       (orientation:landscape) and (pointer:coarse) and (max-height:560px),
-       (prefers-reduced-motion:reduce){
-  .hero{height:auto}
-  .stage{position:relative;height:auto;min-height:100svh;display:flex}
-  .stage video,.ring,.cue,.scrim,.navscrim{display:none}
-  .stage .poster{position:absolute;inset:0;opacity:1;background-image:var(--still) !important}
-  .stage .poster::after{
-    content:"";position:absolute;inset:0;
-    background:linear-gradient(to bottom,rgba(14,10,6,.62),rgba(14,10,6,.36) 42%,rgba(14,10,6,.8))
+/* ---------- portrait screens: the journey plays, laid out for a tall frame ---------- */
+@media (max-aspect-ratio:1/1){
+  .band{align-items:flex-start;padding-top:19vh}
+  .band .inner{width:min(20ch,86vw)}
+  .band .line{font-size:clamp(30px,7.4vw,52px)}
+  .band::before{
+    background:radial-gradient(ellipse 92% 46% at 50% 26%,rgba(8,5,3,.74) 0%,rgba(8,5,3,.54) 48%,rgba(8,5,3,0) 78%)
   }
-  .band{display:none}
-  .band.settle{
-    display:flex;position:relative;opacity:1 !important;align-items:center;justify-content:center;
-    padding:clamp(110px,17vh,150px) var(--gut) clamp(64px,10vh,90px);width:100%;
-    /* the scroll drive never runs here, so the staged reveal is handed its finished values */
-    --k:1;--kh:1;--ks2:1;--kb:1
+  .band.settle{align-items:center;padding-top:0}
+  .band.settle::before{
+    background:radial-gradient(ellipse 96% 54% at 50% 46%,rgba(8,5,3,.80) 0%,rgba(8,5,3,.62) 46%,rgba(8,5,3,0) 80%)
   }
-  .band.settle::before{display:none}
-  .band.settle .inner{width:min(30ch,100%)}
-  .band .c{opacity:1 !important;transform:none !important}
+  .band.settle .inner{width:min(30ch,88vw)}
 }
+
+/* ---------- the static hero ----------
+   ONE source of truth: the class below. A tiny script in <head> sets it before the
+   first paint, from exactly the same conditions the main script later re-evaluates,
+   so the CSS side and the JavaScript side can never disagree with each other. */
+html.static-hero .hero{height:auto}
+html.static-hero .stage{position:relative;height:auto;min-height:100svh;display:flex}
+html.static-hero .stage video,
+html.static-hero .ring,
+html.static-hero .cue,
+html.static-hero .scrim,
+html.static-hero .navscrim{display:none}
+html.static-hero .stage .poster{position:absolute;inset:0;opacity:1;background-image:var(--still) !important}
+html.static-hero .stage .poster::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(14,10,6,.62),rgba(14,10,6,.36) 42%,rgba(14,10,6,.8))
+}
+html.static-hero .band{display:none}
+html.static-hero .band.settle{
+  display:flex;position:relative;opacity:1 !important;align-items:center;justify-content:center;
+  padding:clamp(110px,17vh,150px) var(--gut) clamp(64px,10vh,90px);width:100%;
+  /* the scroll drive never runs here, so the staged reveal is handed its finished values */
+  --k:1;--kh:1;--ks2:1;--kb:1
+}
+html.static-hero .band.settle::before{display:none}
+html.static-hero .band.settle .inner{width:min(30ch,100%)}
+html.static-hero .band .c{opacity:1 !important;transform:none !important}
 @media (max-height:560px){.ring,.cue{display:none}}
 @media (max-width:440px){.settle .kicker{font-size:9.5px;letter-spacing:.19em}}
 
@@ -509,6 +525,27 @@ footer{background:var(--panel);padding:clamp(56px,6vw,92px) var(--gut) 34px;bord
 }
 body.paused *,body.paused *::before,body.paused *::after{animation-play-state:paused !important}
 </style>
+<script>
+/* Decides the hero mode before the first paint. The main script re-uses these exact
+   two functions, so there is only ever one definition of "static hero". */
+window.HERO_GATES = [
+  '(orientation: landscape) and (pointer: coarse) and (max-height: 560px)',
+  '(prefers-reduced-motion: reduce)'
+];
+window.heroSlowLink = function(){
+  var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (!c) return false;
+  if (c.saveData) return true;
+  return /^(slow-2g|2g|3g)$/.test(c.effectiveType || '');
+};
+window.heroIsStatic = function(){
+  for (var i = 0; i < window.HERO_GATES.length; i++){
+    if (matchMedia(window.HERO_GATES[i]).matches) return true;
+  }
+  return window.heroSlowLink();
+};
+if (window.heroIsStatic()) document.documentElement.classList.add('static-hero');
+</script>
 <noscript><style>
   /* no script: the page becomes the designed still site, complete and readable */
   .hero{height:auto}
@@ -908,10 +945,15 @@ body.paused *,body.paused *::before,body.paused *::after{animation-play-state:pa
 /* ============================================================
    1. HERO SCRUB
    ============================================================ */
-var VIDEO_URL   = 'assets/hero-scrub.mp4';
-var VIDEO_BYTES = 5794911;
-var POSTER      = 'assets/hero-poster.jpg';
-var STILL       = 'assets/hero-ending.jpg';
+/* Two cuts of the same shot. Tall screens get the portrait crop, which is a quarter
+   of the weight and fills a phone properly instead of being cover-cropped. */
+var SOURCES = {
+  wide:     { video: 'assets/hero-scrub.mp4',          bytes: 5794911, poster: 'assets/hero-poster.jpg',          still: 'assets/hero-ending.jpg' },
+  portrait: { video: 'assets/hero-scrub-portrait.mp4', bytes: 1419771, poster: 'assets/hero-poster-portrait.jpg', still: 'assets/hero-ending-portrait.jpg' }
+};
+var PORTRAIT_Q = '(max-aspect-ratio: 1/1)';
+function pickSource(){ return matchMedia(PORTRAIT_Q).matches ? SOURCES.portrait : SOURCES.wide; }
+var SRC = pickSource();
 
 var hero   = document.getElementById('hero');
 var stage  = document.getElementById('stage');
@@ -919,7 +961,10 @@ var ring   = document.getElementById('ring');
 var poster = stage.querySelector('.poster');
 var bandEls = [].slice.call(stage.querySelectorAll('.band'));
 
-document.documentElement.style.setProperty('--still', "url('" + STILL + "')");
+function applyStill(){
+  document.documentElement.style.setProperty('--still', "url('" + pickSource().still + "')");
+}
+applyStill();
 
 var bands = bandEls.map(function(el){
   return {
@@ -1101,15 +1146,16 @@ if ('IntersectionObserver' in window){
 }
 
 /* --- blob loader with an honest ring --- */
-var heroInited = false, blobStarted = false;
+var heroInited = false, blobStarted = false, loadedSrc = null;
 function initHeroOnce(){
   if (heroInited) return;
   heroInited = true;
-  poster.style.backgroundImage = "url('" + POSTER + "')";
+  SRC = pickSource();
+  poster.style.backgroundImage = "url('" + SRC.poster + "')";
   var img = new Image();
   img.onload = startBlobFetch;
   img.onerror = startBlobFetch;
-  img.src = POSTER;
+  img.src = SRC.poster;
   setTimeout(startBlobFetch, 4000);
 }
 function startBlobFetch(){
@@ -1119,11 +1165,13 @@ function startBlobFetch(){
 }
 function loadHeroBlob(){
   if (!window.fetch || !window.AbortController) return Promise.reject(new Error('no fetch'));
+  var want = pickSource();
+  loadedSrc = want.video;
   var ctrl = new AbortController();
   var watchdog = setTimeout(function(){ ctrl.abort(); }, 20000);
-  return fetch(VIDEO_URL, { signal: ctrl.signal }).then(function(res){
+  return fetch(want.video, { signal: ctrl.signal }).then(function(res){
     if (!res.ok || !res.body) throw new Error('bad response');
-    var total = Number(res.headers.get('Content-Length')) || VIDEO_BYTES;
+    var total = Number(res.headers.get('Content-Length')) || want.bytes;
     var reader = res.body.getReader();
     var chunks = [], got = 0, lastRing = 0;
     function pump(){
@@ -1167,21 +1215,18 @@ function failVideo(){
   stage.classList.add('video-failed');
 }
 
-/* --- the five gates, live in both directions --- */
-var GATES = [
-  '(max-width: 720px)',
-  '(orientation: portrait) and (max-width: 1024px)',
-  '(orientation: portrait) and (pointer: coarse)',
-  '(orientation: landscape) and (pointer: coarse) and (max-height: 560px)',
-  '(prefers-reduced-motion: reduce)'
-];
+/* --- the gate, live in both directions ---
+   heroIsStatic() is defined once, in <head>, and used by both the pre-paint class
+   and everything below, so the two sides cannot drift apart. */
 var scrubOn = false;
 function enableScrub(){
   if (scrubOn) return;
   scrubOn = true;
+  document.documentElement.classList.remove('static-hero');
   initHeroOnce();
   window.addEventListener('scroll', onScroll, { passive: true });
   bands.forEach(function(b){ b.op = -1; b.k = -1; });
+  unpinFinalStates();
   updateCaptions(heroProgress());
   runLoadRamp();
   onScroll();
@@ -1189,17 +1234,34 @@ function enableScrub(){
 function disableScrub(){
   if (!scrubOn) return;
   scrubOn = false;
+  document.documentElement.classList.add('static-hero');
   window.removeEventListener('scroll', onScroll);
   if (rafId !== null){ cancelAnimationFrame(rafId); rafId = null; }
 }
 function applyHeroMode(){
-  var gated = GATES.some(function(q){ return matchMedia(q).matches; });
-  if (gated) disableScrub(); else enableScrub();
+  if (window.heroIsStatic()) disableScrub(); else enableScrub();
 }
-var MQLS = GATES.map(function(q){ return matchMedia(q); });
+
+/* Rotating a phone changes which cut of the film belongs on screen. Swap it,
+   but only once the first one has actually finished loading. */
+function applySourceMode(){
+  applyStill();
+  if (!scrubOn || !blobStarted) return;
+  var want = pickSource();
+  if (want.video === loadedSrc) return;
+  blobStarted = false;
+  stage.classList.remove('video-ready');
+  poster.style.backgroundImage = "url('" + want.poster + "')";
+  if (ring) ring.style.setProperty('--ld', 126);
+  startBlobFetch();
+}
+
+var MQLS = window.HERO_GATES.map(function(q){ return matchMedia(q); });
+MQLS.push(matchMedia(PORTRAIT_Q));
 MQLS.forEach(function(m){
-  if (m.addEventListener) m.addEventListener('change', applyHeroMode);
-  else if (m.addListener) m.addListener(applyHeroMode);
+  var handler = function(){ applyHeroMode(); applySourceMode(); };
+  if (m.addEventListener) m.addEventListener('change', handler);
+  else if (m.addListener) m.addListener(handler);
 });
 
 /* band one opens settled: a one-time load ramp handing over to scroll */
@@ -1398,6 +1460,9 @@ function pinToFinalStates(){
   if (hRaf !== null){ cancelAnimationFrame(hRaf); hRaf = null; }
 }
 function unpinFinalStates(){
+  /* enableScrub can run before the rings section has been wired up, so this
+     has to be safe to call at any point in the start-up order */
+  if (!ringsW || !ringNodes.length) return;
   ringsW.classList.remove('done');
   aboutW.classList.remove('solved');
   hint.textContent = 'Țineți apăsat';
