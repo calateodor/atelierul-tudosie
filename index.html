@@ -156,6 +156,7 @@ p{margin:0}
   background:radial-gradient(ellipse 66% 60% at 26% 50%,rgba(8,5,3,.68) 0%,rgba(8,5,3,.46) 46%,rgba(8,5,3,0) 76%)
 }
 .band .inner{position:relative;width:min(30ch,44vw)}
+.band .line[data-view="portrait"]{display:none}
 .band .line{
   font-family:var(--display);font-weight:300;
   font-size:clamp(34px,5.1vw,74px);line-height:1.04;letter-spacing:-.008em;
@@ -470,9 +471,16 @@ footer{background:var(--panel);padding:clamp(56px,6vw,92px) var(--gut) 34px;bord
 
 /* ---------- portrait screens: the journey plays, laid out for a tall frame ---------- */
 @media (max-aspect-ratio:1/1){
-  .band{align-items:flex-start;padding-top:19vh}
-  .band .inner{width:min(20ch,86vw)}
+  /* half the scroll distance of the wide layout, so the journey moves twice as fast
+     under a thumb; the beat map is re-timed in JS to match, see PORTRAIT_BANDS */
+  .hero{height:350vh}
+  .band{align-items:flex-start;justify-content:center;padding-top:17vh;text-align:center}
+  .band .inner{width:min(22ch,86vw);text-align:center}
   .band .line{font-size:clamp(30px,7.4vw,52px)}
+  .band .line.sm{font-size:clamp(25px,6.1vw,42px)}
+  .band .line[data-view="wide"]{display:none}
+  .band .line[data-view="portrait"]{display:block}
+  .band.wide-band{display:none}
   .band::before{
     background:radial-gradient(ellipse 92% 46% at 50% 26%,rgba(8,5,3,.74) 0%,rgba(8,5,3,.54) 48%,rgba(8,5,3,0) 78%)
   }
@@ -605,9 +613,12 @@ if (window.heroIsStatic()) document.documentElement.classList.add('static-hero')
     </svg>
 
     <div class="band" data-band="0" data-a="0" data-b="0.20">
-      <div class="inner"><p class="line" data-split="char" data-entrance="drift">Un stejar crește un inel pe an.</p></div>
+      <div class="inner">
+        <p class="line" data-view="wide" data-split="char" data-entrance="drift">Un stejar crește un inel pe an.</p>
+        <p class="line sm" data-view="portrait" data-split="char" data-entrance="drift">Un stejar crește un inel pe an. Trunchiul le ține minte pe toate.</p>
+      </div>
     </div>
-    <div class="band" data-band="1" data-a="0.24" data-b="0.46">
+    <div class="band wide-band" data-band="1" data-a="0.24" data-b="0.46">
       <div class="inner"><p class="line" data-split="char" data-entrance="scatter">Trunchiul le ține minte pe toate.</p></div>
     </div>
     <div class="band" data-band="2" data-a="0.50" data-b="0.72" data-ramp="0.034">
@@ -966,15 +977,32 @@ function applyStill(){
 }
 applyStill();
 
+/* Two beat maps for two shapes of screen. The portrait journey covers half the scroll
+   distance, so it runs on three beats instead of four: the first two lines are shown
+   together as one. Fewer, longer beats is what keeps each one readable at speed. */
+var BAND_MAPS = {
+  wide:     [[0, 0.20], [0.24, 0.46], [0.50, 0.72], [0.76, 1.00]],
+  portrait: [[0, 0.33], null,         [0.37, 0.67], [0.71, 1.00]]
+};
 var bands = bandEls.map(function(el){
   return {
     el: el,
     a: parseFloat(el.dataset.a),
     b: parseFloat(el.dataset.b),
     ramp: el.dataset.ramp ? parseFloat(el.dataset.ramp) : 0,
+    off: false,
     op: -1, k: -1
   };
 });
+function applyBandMap(){
+  var map = matchMedia(PORTRAIT_Q).matches ? BAND_MAPS.portrait : BAND_MAPS.wide;
+  bands.forEach(function(b, i){
+    var r = map[i];
+    b.off = !r;
+    if (r){ b.a = r[0]; b.b = r[1]; }
+    b.op = -1; b.k = -1;
+  });
+}
 
 var clamp = function(v, lo, hi){ return v < lo ? lo : (v > hi ? hi : v); };
 var smoothstep = function(p, e0, e1){
@@ -990,9 +1018,11 @@ function rng(seed){
 
 /* split the headlines once, at load */
 (function splitAll(){
-  bandEls.forEach(function(bandEl, bi){
-    var line = bandEl.querySelector('.line');
-    if (!line) return;
+  var idx = 0;
+  bandEls.forEach(function(bandEl, bandIndex){
+    /* a band can hold more than one wording, one per screen shape */
+    [].forEach.call(bandEl.querySelectorAll('.line'), function(line){
+    var bi = idx++;
     var text = line.textContent;
     var mode = line.dataset.split;
     var ent  = line.dataset.entrance;
@@ -1045,6 +1075,7 @@ function rng(seed){
     line.textContent = '';
     line.appendChild(sr);
     line.appendChild(vis);
+    });
   });
 })();
 
@@ -1097,6 +1128,7 @@ var loadK = 0;
 function updateCaptions(p){
   for (var i = 0; i < bands.length; i++){
     var b = bands[i];
+    if (b.off) continue;                     /* folded into a neighbour on this screen */
     var f = Math.min(0.02, (b.b - b.a) / 3);
     var inA = (i === 0) ? 1 : smoothstep(p, b.a, b.a + f);
     var outB = (i === bands.length - 1) ? 0 : smoothstep(p, b.b - f, b.b);
@@ -1225,7 +1257,7 @@ function enableScrub(){
   document.documentElement.classList.remove('static-hero');
   initHeroOnce();
   window.addEventListener('scroll', onScroll, { passive: true });
-  bands.forEach(function(b){ b.op = -1; b.k = -1; });
+  applyBandMap();
   unpinFinalStates();
   updateCaptions(heroProgress());
   runLoadRamp();
@@ -1246,6 +1278,8 @@ function applyHeroMode(){
    but only once the first one has actually finished loading. */
 function applySourceMode(){
   applyStill();
+  applyBandMap();
+  if (scrubOn){ updateCaptions(heroProgress()); onScroll(); }
   if (!scrubOn || !blobStarted) return;
   var want = pickSource();
   if (want.video === loadedSrc) return;
