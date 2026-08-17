@@ -191,7 +191,14 @@ p{margin:0}
 /* the lockup standing in for the plain wordmark */
 .settle .lockup{font-size:inherit;letter-spacing:normal;text-transform:none;margin:0 auto;max-width:min(620px,88vw)}
 .settle .lockup .lk-main{font-size:clamp(44px,6.9vw,104px)}
-.settle .lockup .lk-top,.settle .lockup .lk-est,.settle .lockup .lk-sub{color:rgba(246,241,230,.92)}
+.settle .lockup .lk-top,.settle .lockup .lk-est,.settle .lockup .lk-bowl path.lk-sweep{stroke-width:5}
+.lockup .lk-bowl path.lk-comp{stroke-width:2.3}
+.lockup .lk-bowl path.lk-heart{
+  fill:currentColor;stroke:none;stroke-dasharray:none;stroke-dashoffset:0;
+  transform-box:fill-box;transform-origin:50% 0;
+  opacity:var(--kc);transform:scale(var(--kc))
+}
+.lockup .lk-sub{color:rgba(246,241,230,.92)}
 .settle .lockup .lk-bowl svg,.settle .lockup .lk-rule{color:rgba(246,241,230,.86)}
 .band.settle .inner{width:min(700px,90vw)}
 
@@ -212,35 +219,45 @@ p{margin:0}
 /* ATELIERUL is the same serif as TUDOSIE in the artwork, not a sans */
 .lockup .lk-top{
   font-family:var(--display);font-weight:400;
-  font-size:clamp(13px,1.72vw,31px);letter-spacing:.34em;text-indent:.34em;
+  font-size:clamp(12px,1.56vw,28px);letter-spacing:.42em;text-indent:.42em;
 }
 .lockup .lk-est{
   font-family:var(--body);font-weight:500;
-  font-size:clamp(8px,.72vw,13px);letter-spacing:.26em;text-indent:.26em;
+  font-size:clamp(9px,.78vw,14px);letter-spacing:.28em;text-indent:.28em;
   margin-top:clamp(9px,.9vw,14px);
 }
 .lockup .lk-r{
   display:block;flex:1 1 auto;max-width:clamp(28px,6vw,96px);height:12px;overflow:visible;
   transform-origin:50% 50%;
 }
-.lockup .lk-r path{fill:none;stroke:currentColor;stroke-width:1.6;vector-effect:non-scaling-stroke}
+.lockup .lk-r path{fill:none;stroke:currentColor;stroke-width:1.5;vector-effect:non-scaling-stroke}
+/* the artwork gives ATELIERUL short flanks and EST. 2002 long ones */
+.lockup .lk-top .lk-r{max-width:clamp(24px,4.8vw,76px)}
+.lockup .lk-est .lk-r{max-width:clamp(34px,7.6vw,120px)}
 .lockup .lk-main{
   display:block;font-family:var(--display);font-weight:600;text-transform:uppercase;
   font-size:clamp(46px,7.6vw,124px);letter-spacing:.028em;text-indent:.028em;
   margin-top:clamp(1px,.2vw,4px);white-space:nowrap;
 }
 .lockup .lk-main .lkc{display:inline-block}
-.lockup .lk-bowl{display:block;margin-top:clamp(2px,.4vw,8px)}
+.lockup .lk-bowl{display:block;margin-top:0}
 .lockup .lk-bowl svg{display:block;width:100%;height:auto;overflow:visible}
-.lockup .lk-rule{stroke:currentColor;stroke-width:1.6;transform-origin:50% 50%}
+.lockup .lk-rule{stroke:currentColor;stroke-width:1.8;transform-origin:50% 50%}
 .lockup .lk-bowl path{
-  fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;
+  fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;
   /* each ring sprouts at the bottom of its arc and grows up both sides at once,
      the way wood is laid down, using a centred dash: at --kc 0 nothing, at 1 the
      whole arc. Heart first, outward, staggered by --rth. */
-  --kc:clamp(0,calc((var(--lk,1) - .2 - var(--rth,0) * .95) * 5),1);
+  --kc:clamp(0,calc((var(--lk,1) - .18 - var(--rth,0) * .9) * 5),1);
   stroke-dasharray:calc(var(--kc) * var(--len,300)) var(--len,300);
   stroke-dashoffset:calc(var(--len,300) * (1.5 * var(--kc) + .5));
+}
+.lockup .lk-bowl path.lk-sweep{stroke-width:5}
+.lockup .lk-bowl path.lk-comp{stroke-width:2.3}
+.lockup .lk-bowl path.lk-heart{
+  fill:currentColor;stroke:none;stroke-dasharray:none;stroke-dashoffset:0;
+  transform-box:fill-box;transform-origin:50% 0;
+  opacity:var(--kc);transform:scale(var(--kc))
 }
 .lockup .lk-sub{
   display:block;font-family:var(--body);font-weight:500;text-transform:uppercase;
@@ -276,8 +293,8 @@ p{margin:0}
 .lockup.lk-anim.drawn{--lk:1}
 .lockup.lk-anim.drawn .lk-main .lkc{transition-delay:calc(var(--ci,0) * .045s)}
 .lockup.lk-anim.drawn .lk-bowl path{transition-delay:calc(.22s + var(--rth,0) * 1.75s)}
-.lockup.lk-anim.drawn .lk-sub{transition-delay:.95s}
-.lockup.lk-anim.drawn .lk-est{transition-delay:1.08s}
+.lockup.lk-anim.drawn .lk-sub{transition-delay:1.3s}
+.lockup.lk-anim.drawn .lk-est{transition-delay:1.45s}
 
 /* the mark alone, for the nav */
 .navmark{display:block;width:clamp(32px,2.6vw,42px);height:auto;overflow:hidden;flex:0 0 auto}
@@ -289,6 +306,10 @@ p{margin:0}
 .navmark.drawn path{stroke-dasharray:var(--len,300) var(--len,300);stroke-dashoffset:calc(var(--len,300) * 2);
   transition-delay:calc(.1s + var(--rth,0) * 1.1s)}
 .navmark.drawn line{transform:scaleX(1)}
+.navmark path.lk-sweep{stroke-width:9}
+.navmark path.lk-heart{fill:currentColor;stroke:none;stroke-dasharray:none !important;stroke-dashoffset:0 !important;
+  opacity:0;transition:opacity .5s var(--ease-out) .9s}
+.navmark.drawn path.lk-heart{opacity:1}
 
 @media (prefers-reduced-motion:reduce){
   .lockup{--lk:1 !important}
@@ -297,6 +318,7 @@ p{margin:0}
   .lockup .lk-bowl path{stroke-dasharray:none !important;stroke-dashoffset:0 !important}
   .navmark path{stroke-dasharray:none !important;stroke-dashoffset:0 !important}
   .navmark line{transform:scaleX(1) !important}
+  .lockup .lk-bowl path.lk-heart,.navmark path.lk-heart{opacity:1 !important;transform:none !important}
 }
 
 /* ---------- buttons ---------- */
@@ -576,10 +598,19 @@ footer{background:var(--panel);padding:clamp(56px,6vw,92px) var(--gut) 34px;bord
 .fbrand .lockup{max-width:min(340px,80vw);color:var(--ink)}
 .fbrand .lockup .lk-main{font-size:clamp(34px,3.6vw,50px)}
 .fbrand .lockup .lk-top{font-size:clamp(9px,.78vw,11px)}
-.fbrand .lockup .lk-sub{font-size:clamp(8.5px,.72vw,10px);color:var(--ink-soft)}
+.fbrand .lockup .lk-bowl path.lk-sweep{stroke-width:5}
+.lockup .lk-bowl path.lk-comp{stroke-width:2.3}
+.lockup .lk-bowl path.lk-heart{
+  fill:currentColor;stroke:none;stroke-dasharray:none;stroke-dashoffset:0;
+  transform-box:fill-box;transform-origin:50% 0;
+  opacity:var(--kc);transform:scale(var(--kc))
+}
+.lockup .lk-sub{font-size:clamp(8.5px,.72vw,10px);color:var(--ink-soft)}
 .fbrand .lockup .lk-est{font-size:8.5px;color:var(--ink-soft)}
-.fbrand .lockup .lk-bowl path{stroke-width:2.6}
-.fbrand .lockup .lk-rule{stroke-width:2.4}
+.fbrand .lockup .lk-bowl path{stroke-width:3}
+.fbrand .lockup .lk-bowl path.lk-sweep{stroke-width:6}
+.fbrand .lockup .lk-bowl path.lk-comp{stroke-width:2.8}
+.fbrand .lockup .lk-rule{stroke-width:2.2}
 .fbot{
   margin-top:clamp(44px,4.6vw,68px);padding-top:22px;border-top:1px solid var(--line);
   display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between;
@@ -694,6 +725,7 @@ if (window.heroIsStatic()) document.documentElement.classList.add('static-hero')
   .lockup.lk-anim{--lk:1}
   .navmark path{stroke-dasharray:none;stroke-dashoffset:0}
   .navmark line{transform:scaleX(1)}
+  .lockup .lk-bowl path.lk-heart,.navmark path.lk-heart{opacity:1;transform:none}
 </style></noscript>
 </head>
 <body>
@@ -705,13 +737,13 @@ if (window.heroIsStatic()) document.documentElement.classList.add('static-hero')
 
 <nav class="nav" id="nav">
   <a class="brandmark" href="#top" aria-label="Atelierul Tudosie, acasă">
-    <svg class="navmark" id="navmark" viewBox="158 -4 244 112" aria-hidden="true">
-      <line x1="160" y1="4" x2="400" y2="4"/>
-      <path d="M268 4A12 11.5 0 0 0 292 4" style="--len:36;--rth:0.00"/>
-      <path d="M230 4A50 47.5 0 0 0 330 4" style="--len:153;--rth:0.15"/>
-      <path d="M196.5 4A83.5 78.5 0 0 0 363.5 4" style="--len:255;--rth:0.30"/>
-      <path d="M186.5 4A94 88 0 0 0 374.5 4" style="--len:286;--rth:0.45"/>
-      <path d="M162 4A118 99 0 0 0 398 4" style="--len:344;--rth:0.60"/>
+    <svg class="navmark" id="navmark" viewBox="88 -6 390 100" aria-hidden="true">
+      <line x1="88" y1="4" x2="478" y2="4"/>
+      <path d="M253 4A30 19 0 0 0 313 4" style="--len:79;--rth:0.12"/>
+      <path d="M211 4A72 43 0 0 0 355 4" style="--len:186;--rth:0.27"/>
+      <path d="M180 4A103 58 0 0 0 386 4" style="--len:263;--rth:0.42"/>
+      <path class="lk-sweep" d="M98 4C126 6 146 22 170 44C196 67 234 84 283 84C332 84 370 67 396 44C420 22 440 6 468 4" style="--len:450;--rth:0.58"/>
+      <path class="lk-heart" d="M276.5 4A6.5 5 0 0 0 289.5 4Z" style="--rth:0"/>
     </svg>
     <span class="bt">Tudosie</span>
   </a>
@@ -755,25 +787,30 @@ if (window.heroIsStatic()) document.documentElement.classList.add('static-hero')
       <div class="inner">
         <h1 class="lockup" id="heroLockup">
           <span class="sr">Atelierul Tudosie, din pasiune pentru lemn, est. 2002</span>
-          <span class="lk-top" aria-hidden="true"><svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 2.2H42"/><path d="M0 8.6H100"/></svg>Atelierul<svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M58 2.2H100"/><path d="M0 8.6H100"/></svg></span>
+          <span class="lk-top" aria-hidden="true"><svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6H100"/></svg>Atelierul<svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6H100"/></svg></span>
           <span class="lk-main" data-split-lockup aria-hidden="true">Tudosie</span>
           <span class="lk-bowl" aria-hidden="true">
-            <svg viewBox="-4 -6 568 112">
+            <svg viewBox="-4 -4 568 96">
               <line class="lk-rule" x1="0" y1="4" x2="560" y2="4"/>
-              <path d="M268 4A12 11.5 0 0 0 292 4" style="--len:36;--rth:0"/>
-              <path d="M255.5 4A25 24 0 0 0 305.5 4" style="--len:77;--rth:0.064"/>
-              <path d="M242 4A37.5 36 0 0 0 317 4" style="--len:115;--rth:0.128"/>
-              <path d="M230 4A50 47.5 0 0 0 330 4" style="--len:153;--rth:0.192"/>
-              <path d="M218.5 4A62 58.5 0 0 0 342.5 4" style="--len:189;--rth:0.256"/>
-              <path d="M206.5 4A73 69 0 0 0 352.5 4" style="--len:223;--rth:0.320"/>
-              <path d="M196.5 4A83.5 78.5 0 0 0 363.5 4" style="--len:255;--rth:0.384"/>
-              <path d="M186.5 4A94 88 0 0 0 374.5 4" style="--len:286;--rth:0.448"/>
-              <path d="M174 4A106 93 0 0 0 386 4" style="--len:316;--rth:0.512"/>
-              <path d="M162 4A118 99 0 0 0 398 4" style="--len:344;--rth:0.576"/>
+              <defs><clipPath id="bowlclip0"><path d="M98 4C126 6 146 22 170 44C196 67 234 84 283 84C332 84 370 67 396 44C420 22 440 6 468 4Z"/></clipPath></defs>
+              <g clip-path="url(#bowlclip0)">
+                <path d="M267 4A16 11 0 0 0 299 4" style="--len:43;--rth:0.06"/>
+                <path d="M253 4A30 19 0 0 0 313 4" style="--len:79;--rth:0.11"/>
+                <path d="M239 4A44 27 0 0 0 327 4" style="--len:115;--rth:0.16"/>
+                <path d="M225 4A58 35 0 0 0 341 4" style="--len:151;--rth:0.21"/>
+                <path d="M211 4A72 43 0 0 0 355 4" style="--len:186;--rth:0.26"/>
+                <path d="M196 4A87 51 0 0 0 370 4" style="--len:224;--rth:0.31"/>
+                <path d="M180 4A103 58 0 0 0 386 4" style="--len:263;--rth:0.36"/>
+                <path d="M161 4A122 65 0 0 0 405 4" style="--len:307;--rth:0.41"/>
+                <path d="M138 4A145 72 0 0 0 428 4" style="--len:360;--rth:0.46"/>
+              </g>
+              <path class="lk-comp" d="M118 6C146 28 168 52 200 68C240 82 300 86 340 78C364 72 382 63 396 52" style="--len:330;--rth:0.54"/>
+              <path class="lk-sweep" d="M98 4C126 6 146 22 170 44C196 67 234 84 283 84C332 84 370 67 396 44C420 22 440 6 468 4" style="--len:450;--rth:0.60"/>
+              <path class="lk-heart" d="M276.5 4A6.5 5 0 0 0 289.5 4Z" style="--rth:0"/>
             </svg>
           </span>
           <span class="lk-sub" aria-hidden="true">Din pasiune pentru lemn</span>
-          <span class="lk-est" aria-hidden="true"><svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 3H100"/><path d="M0 9H100"/></svg>Est. 2002<svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 3H100"/><path d="M0 9H100"/></svg></span>
+          <span class="lk-est" aria-hidden="true"><svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6H100"/></svg>Est. 2002<svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6H100"/></svg></span>
         </h1>
         <p class="sub">Mobilier din lemn masiv, făcut să dureze generații.</p>
         <div class="row">
@@ -1056,25 +1093,30 @@ if (window.heroIsStatic()) document.documentElement.classList.add('static-hero')
       <div class="fbrand">
         <div class="lockup lk-anim" id="footLockup">
           <span class="sr">Atelierul Tudosie, din pasiune pentru lemn, est. 2002</span>
-          <span class="lk-top" aria-hidden="true"><svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 2.2H42"/><path d="M0 8.6H100"/></svg>Atelierul<svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M58 2.2H100"/><path d="M0 8.6H100"/></svg></span>
+          <span class="lk-top" aria-hidden="true"><svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6H100"/></svg>Atelierul<svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6H100"/></svg></span>
           <span class="lk-main" data-split-lockup aria-hidden="true">Tudosie</span>
           <span class="lk-bowl" aria-hidden="true">
-            <svg viewBox="-4 -6 568 112">
+            <svg viewBox="-4 -4 568 96">
               <line class="lk-rule" x1="0" y1="4" x2="560" y2="4"/>
-              <path d="M268 4A12 11.5 0 0 0 292 4" style="--len:36;--rth:0"/>
-              <path d="M255.5 4A25 24 0 0 0 305.5 4" style="--len:77;--rth:0.064"/>
-              <path d="M242 4A37.5 36 0 0 0 317 4" style="--len:115;--rth:0.128"/>
-              <path d="M230 4A50 47.5 0 0 0 330 4" style="--len:153;--rth:0.192"/>
-              <path d="M218.5 4A62 58.5 0 0 0 342.5 4" style="--len:189;--rth:0.256"/>
-              <path d="M206.5 4A73 69 0 0 0 352.5 4" style="--len:223;--rth:0.320"/>
-              <path d="M196.5 4A83.5 78.5 0 0 0 363.5 4" style="--len:255;--rth:0.384"/>
-              <path d="M186.5 4A94 88 0 0 0 374.5 4" style="--len:286;--rth:0.448"/>
-              <path d="M174 4A106 93 0 0 0 386 4" style="--len:316;--rth:0.512"/>
-              <path d="M162 4A118 99 0 0 0 398 4" style="--len:344;--rth:0.576"/>
+              <defs><clipPath id="bowlclip1"><path d="M98 4C126 6 146 22 170 44C196 67 234 84 283 84C332 84 370 67 396 44C420 22 440 6 468 4Z"/></clipPath></defs>
+              <g clip-path="url(#bowlclip1)">
+                <path d="M267 4A16 11 0 0 0 299 4" style="--len:43;--rth:0.06"/>
+                <path d="M253 4A30 19 0 0 0 313 4" style="--len:79;--rth:0.11"/>
+                <path d="M239 4A44 27 0 0 0 327 4" style="--len:115;--rth:0.16"/>
+                <path d="M225 4A58 35 0 0 0 341 4" style="--len:151;--rth:0.21"/>
+                <path d="M211 4A72 43 0 0 0 355 4" style="--len:186;--rth:0.26"/>
+                <path d="M196 4A87 51 0 0 0 370 4" style="--len:224;--rth:0.31"/>
+                <path d="M180 4A103 58 0 0 0 386 4" style="--len:263;--rth:0.36"/>
+                <path d="M161 4A122 65 0 0 0 405 4" style="--len:307;--rth:0.41"/>
+                <path d="M138 4A145 72 0 0 0 428 4" style="--len:360;--rth:0.46"/>
+              </g>
+              <path class="lk-comp" d="M118 6C146 28 168 52 200 68C240 82 300 86 340 78C364 72 382 63 396 52" style="--len:330;--rth:0.54"/>
+              <path class="lk-sweep" d="M98 4C126 6 146 22 170 44C196 67 234 84 283 84C332 84 370 67 396 44C420 22 440 6 468 4" style="--len:450;--rth:0.60"/>
+              <path class="lk-heart" d="M276.5 4A6.5 5 0 0 0 289.5 4Z" style="--rth:0"/>
             </svg>
           </span>
           <span class="lk-sub" aria-hidden="true">Din pasiune pentru lemn</span>
-          <span class="lk-est" aria-hidden="true"><svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 3H100"/><path d="M0 9H100"/></svg>Est. 2002<svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 3H100"/><path d="M0 9H100"/></svg></span>
+          <span class="lk-est" aria-hidden="true"><svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6H100"/></svg>Est. 2002<svg class="lk-r" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6H100"/></svg></span>
         </div>
         <p class="tag">Mobilier din lemn masiv, făcut să dureze generații.</p>
       </div>
